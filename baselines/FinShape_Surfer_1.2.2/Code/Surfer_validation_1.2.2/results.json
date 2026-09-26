@@ -1,0 +1,22 @@
+{
+  "release": "FinShape Surfer 1.2.2",
+  "date": "2026-09-11",
+  "interpreter": "project virtual environment (absolute path redacted for public release)",
+  "final_results": {
+    "new_non_gui": {"passed": 8, "failed": 0, "skipped": 1},
+    "new_real_tk": {"passed": 1, "failed": 0, "skipped": 0, "elapsed_seconds": 15.228},
+    "preserved_1_2_1": {"passed": 12, "failed": 0, "skipped": 1},
+    "preserved_1_2_0": {"passed": 11, "failed": 0, "skipped": 1},
+    "preserved_1_1_3_baseline": {"passed": 31, "failed": 0, "skipped": 0},
+    "preserved_1_1_3_full": {"passed": 87, "failed": 0, "skipped": 27},
+    "compile": "pass",
+    "pip_check": "pass",
+    "protected_hashes": {"matched": 8, "total": 8}
+  },
+  "scientific_scope": {
+    "measurement_geometry_changed": false,
+    "cfd_surface_changed": false,
+    "camera_calibrated": false,
+    "automatic_identity_claim": false
+  }
+}

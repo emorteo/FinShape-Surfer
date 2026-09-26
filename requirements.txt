@@ -1,0 +1,11 @@
+numpy
+pandas
+matplotlib
+Pillow
+openpyxl
+scipy
+pytest
+open3d
+# dev extras
+ruff
+mypy

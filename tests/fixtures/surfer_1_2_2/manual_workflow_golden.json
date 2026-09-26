@@ -1,0 +1,393 @@
+{
+  "baseline": "FinShape Surfer 1.2.2",
+  "fixture": {
+    "description": "Synthetic manual landmark case; no biological truth is implied.",
+    "landmark_order": [
+      "B",
+      "A",
+      "C30",
+      "C20",
+      "C10",
+      "C5",
+      "D"
+    ],
+    "landmarks_pixels": {
+      "A": [
+        22.259833134684147,
+        12.856972586412395
+      ],
+      "B": [
+        145.84028605482717,
+        89.99880810488676
+      ],
+      "C10": [
+        30.895113230035754,
+        43.36829558998808
+      ],
+      "C20": [
+        33.581644815256254,
+        66.20381406436233
+      ],
+      "C30": [
+        28.208581644815254,
+        85.96901072705602
+      ],
+      "C5": [
+        24.562574493444576,
+        28.592371871275326
+      ],
+      "D": [
+        67.35518474374256,
+        24.178784266984504
+      ]
+    }
+  },
+  "manual_bezier": {
+    "controls": {
+      "LE0_P0": [
+        145.84028605482717,
+        89.99880810488676
+      ],
+      "LE0_P1": [
+        130.55821068094227,
+        66.59244699540437
+      ],
+      "LE0_P2": [
+        90.23086003692839,
+        35.420273863954954
+      ],
+      "LE0_P3": [
+        67.35518474374256,
+        24.178784266984504
+      ],
+      "LE1_P0": [
+        67.35518474374256,
+        24.178784266984504
+      ],
+      "LE1_P1": [
+        57.21352800953517,
+        16.838796185935635
+      ],
+      "LE1_P2": [
+        32.07143027413588,
+        11.964660309892727
+      ],
+      "LE1_P3": [
+        22.259833134684147,
+        12.856972586412395
+      ],
+      "TE1_P0": [
+        22.259833134684147,
+        12.856972586412395
+      ],
+      "TE1_P1": [
+        20.70548271752086,
+        18.709773539928484
+      ],
+      "TE1_P2": [
+        22.728057210965435,
+        24.842741358760428
+      ],
+      "TE1_P3": [
+        24.562574493444576,
+        28.592371871275326
+      ],
+      "TE2_Q0": [
+        24.562574493444576,
+        28.592371871275326
+      ],
+      "TE2_Q1": [
+        32.718116805721095,
+        39.33849821215733
+      ],
+      "TE2_Q2": [
+        33.581644815256254,
+        66.20381406436233
+      ],
+      "TE3_Q0": [
+        33.581644815256254,
+        66.20381406436233
+      ],
+      "TE3_Q1": [
+        29.31389749702026,
+        75.6565673420739
+      ],
+      "TE3_Q2": [
+        28.208581644815254,
+        85.96901072705602
+      ]
+    },
+    "draggable_fields": [
+      "LE0_P1",
+      "LE0_P2",
+      "LE1_P1",
+      "LE1_P2",
+      "TE1_P1",
+      "TE1_P2",
+      "TE2_Q1",
+      "TE3_Q1"
+    ],
+    "fixed_fields": [
+      "LE0_P0",
+      "LE0_P3",
+      "LE1_P0",
+      "LE1_P3",
+      "TE1_P0",
+      "TE1_P3",
+      "TE2_Q0",
+      "TE2_Q2",
+      "TE3_Q0",
+      "TE3_Q2"
+    ],
+    "outline_points_display": 5496,
+    "outline_points_measurement": 4496,
+    "outline_sha256": "246bd3eafabcfaa7f401255b4a1187ef867ea3d150da90a8000ce598afa10aa1",
+    "standardized_first": [
+      0.0,
+      -0.0
+    ],
+    "standardized_last": [
+      -8.079338172946851,
+      -1.8290188241437127e-16
+    ],
+    "standardized_outline_sha256": "bd18b5f013e09384aa4cb87af3e16ca83769ae27ae00f57e74093f44a90e7dfa"
+  },
+  "measurement_row": {
+    "AB_px": "145.681128",
+    "A_dx": "-123.580453",
+    "A_dy": "-77.141836",
+    "C10B_over_AB": "0.8514728844",
+    "C10_dx": "-114.945173",
+    "C10_dy": "-46.630513",
+    "C20B_over_AB": "0.7876984325",
+    "C20_dx": "-112.258641",
+    "C20_dy": "-23.794994",
+    "C30B_over_AB": "0.8079338173",
+    "C30_dx": "-117.631704",
+    "C30_dy": "-4.029797",
+    "C5B_over_AB": "0.9331174966",
+    "C5_dx": "-121.277712",
+    "C5_dy": "-61.406436",
+    "DB_over_AB": "0.7031204153",
+    "D_dx": "-78.485101",
+    "D_dy": "-65.820024",
+    "area_px2": "5536.527916",
+    "image_name": "manual_fixture.png"
+  },
+  "output_policy": {
+    "example_csv": "/other/session.csv",
+    "example_image": "/study/manual_fixture.png",
+    "expected_directory_name": "manual_fixture_FinShape2D3D_outputs_v1.1.3",
+    "image_precedes_csv": true
+  },
+  "protected_source_hashes": {
+    "Code/FinShape2D_R-GUI_2.0.20.py": "5c78bd384ca1b37ada3e6eacb90664a6fdfa26e88055b76d77d333dc2d7ed7a4",
+    "Code/FinShape3D_1.1.20.py": "b108e7794f4ba8a190797ab549a1d820f8a5f934c0258b47deaac8c463c8aed2",
+    "Code/FinShapeCFD_0.1.0.py": "0b707430fc9a4ee03e3f51bf5e7588e1462ce75acd5f828cb130156beedb518d",
+    "Code/FinShapeTextureHQ_0.1.0.py": "ce2ca4ff98180cf891abbb29d9f88b04db3189ff6732072f92a2598509bfa917",
+    "Code/FinShapeTextureHQ_0.2.0.py": "60dccbbfbb75401e20e86db4d32ce8a5757063e2326415df2f9fa7d249491534",
+    "Code/FinShapeTexture_0.1.0.py": "331ec39707e6a4cabc6986cdbfd632685fdce4b666d9afee3c8e2296c31e8a6f",
+    "Code/FinShape_Surfer_GUI_1.1.3.py": "8c50ef09e71dc95be887f9dbcdaeca59905990aa774dbb8d44beeae45db01f79",
+    "Code/FinShape_Surfer_GUI_1.2.0.py": "2241d70328b6b7f27cbbe5523fe47a144d65ce99011bc66c09228c9f63332849",
+    "Code/FinShape_Surfer_GUI_1.2.1.py": "4cf04584d19ec118dec6ce58362a6f714fc95531a9a697919829ee2dc01f3322",
+    "Code/FinShape_Surfer_GUI_1.2.2.py": "867c1c9a723ca22b5d986c1b6a03eb976f19e9dcbafa939d2cabf7a5c28a8dd0",
+    "Code/Surfer_validation_1.2.2/README_release.md": "6a485dd529cef99a400febd0f92f3fff6142ce1eaca9cf58a54220015f2d4041",
+    "Code/Surfer_validation_1.2.2/TEST_COMPLETION.md": "534f35201ebd470dc639f0c1bc59ce00cca288f1cd424e0ee8da6df3e36ca154",
+    "Code/Surfer_validation_1.2.2/artifacts/antialiased_oblique_silhouette.png": "6c24ee2b22e20fb651c15a6f9babb19b3f41b7da765031efe0b5c5b3d79b06eb",
+    "Code/Surfer_validation_1.2.2/artifacts/live_hq_122_right_front.png": "2f44090977471e3d88de48e173ddac286d54361e79750cd74d96cf2551a3cc9b",
+    "Code/Surfer_validation_1.2.2/build_release.py": "1d2a8207f62ccabf5e0efbf3c6d381900c6e7132c5fe87752800d82f53bb4f24",
+    "Code/Surfer_validation_1.2.2/commands_executed.txt": "e90276fcf6b3e9fe38b86b91164e7e6c99b803aa3c20f67fa9bb02217c8e2888",
+    "Code/Surfer_validation_1.2.2/results.json": "bd01f7e53b3f4064f92eec94583d2869f85e312ca3c6a1d3961d43af63df175c",
+    "Code/Surfer_validation_1.2.2/test_hq_view_fixes.py": "6b7d01ebce64d794679b4e73f909dc072b509151add38ee1267797cf0c25760d",
+    "Code/Surfer_validation_1.2.2/test_live_tk_hq_fixes.py": "b246d899f6b1c8cb5f104069ae88ae59d515bde5279f5a502c8d7ca13d2a3a1f",
+    "Code/assets/dorsal_fin_tricolor_otsu.png": "7721e4eaf024c6935872c4f90c87a2dfef7bd6e0b63ddcaf363df070cadaea8f",
+    "Code/requirements-cfd-0.1.0.txt": "f059ffda644f2ca19b1b157ae7807774d76da78333afdbe0d841e33d2f02618b",
+    "Documentation/FinShape_Surfer_1.2.2_3D_Display_Corrections.md": "3c311cc02c60e8d733d0204372ee6585431c4d1232f68ad54aeae38ccb30c8fe"
+  },
+  "reconstruction": {
+    "area_units2": 32.53687493878533,
+    "controls": {
+      "LE_P0": [
+        0.0,
+        0.0
+      ],
+      "LE_P1": [
+        -3.3892238839177313,
+        0.8134078100216796
+      ],
+      "LE_P2": [
+        -7.624701313321777,
+        6.931260803903967
+      ],
+      "LE_P3": [
+        -10.719014172207478,
+        6.1886257177714
+      ],
+      "TE1_P0": [
+        -10.719014172207478,
+        6.1886257177714
+      ],
+      "TE1_P1": [
+        -10.826911906368759,
+        6.162730261572692
+      ],
+      "TE1_P2": [
+        -10.85808473648543,
+        5.4200951754401245
+      ],
+      "TE1_P3": [
+        -10.467338230932159,
+        4.88099997758226
+      ],
+      "TE2_Q0": [
+        -10.467338230932159,
+        4.88099997758226
+      ],
+      "TE2_Q1": [
+        -9.772260638913618,
+        3.9220330087920097
+      ],
+      "TE2_Q2": [
+        -9.601424111122718,
+        1.6929901240157252
+      ],
+      "TE3_P1": [
+        -9.601424111122718,
+        0.825895386761942
+      ],
+      "TE3_Q0": [
+        -9.601424111122718,
+        1.6929901240157252
+      ],
+      "TE3_Q2": [
+        -10.0,
+        0.0
+      ]
+    },
+    "curve_hashes": {
+      "leading": "4b1a085161ff3167497fb4b9cec7f36069399d8d620cb8bc1b118f76e5a863bd",
+      "outline": "463a97691006c46b816d464bc355b736f2caa1bbec51bb567c16de0ad1c2247f",
+      "te1": "ddf0b01d7670c61cb1a35ca4cfae260cf992dbbf315665925f201449010274c0",
+      "te2": "4b2fc6a9c740bda8d7122c9b6381b2dee309e3850a4e27fab93005e1c5729319",
+      "te3": "fdf75a78db92934d40458ee4979465124a5613b900dcbb3a173a2ba0c319b414",
+      "trailing": "232d94d8599f320966bcf53d5f1d7525a03eae10d3bf32aa4115556302a80f2d"
+    },
+    "curve_shapes": {
+      "leading": [
+        900,
+        2
+      ],
+      "outline": [
+        3597,
+        2
+      ],
+      "te1": [
+        900,
+        2
+      ],
+      "te2": [
+        900,
+        2
+      ],
+      "te3": [
+        900,
+        2
+      ],
+      "trailing": [
+        2698,
+        2
+      ]
+    },
+    "edge_reference_count": 103,
+    "edge_reference_sha256": "04d6c02adc6a1b21f4e6d1040bcd0e16281978e0355021f07e13fd54dae6441c",
+    "landmarks": {
+      "A": [
+        -10.719014172207478,
+        6.1886257177714
+      ],
+      "B": [
+        0.0,
+        0.0
+      ],
+      "C10": [
+        -9.903320904970528,
+        3.604514029795501
+      ],
+      "C20": [
+        -9.601424111122718,
+        1.6929901240157252
+      ],
+      "C30": [
+        -10.0,
+        0.0
+      ],
+      "C5": [
+        -10.467338230932159,
+        4.88099997758226
+      ]
+    },
+    "reference_y_sha256": "73216edc42217c47c7a330960ebcbd85c970780c071acbf07f3b347183f455e8",
+    "reference_y_values": [
+      0.0,
+      0.174805141,
+      0.24795765,
+      0.411594303,
+      0.500766825,
+      0.691154001,
+      0.791500692,
+      0.935963779,
+      1.100853839,
+      1.292386396,
+      1.366693945,
+      1.561010143,
+      1.678166326,
+      1.795806913,
+      2.034854726,
+      2.155662901,
+      2.277177221,
+      2.447196504,
+      2.638590274,
+      2.768288907,
+      2.891864054,
+      3.019738851,
+      3.209230661,
+      3.386723316,
+      3.510147917,
+      3.633281309,
+      3.771003222,
+      3.955025959,
+      4.12102384,
+      4.248746969,
+      4.36057723,
+      4.490246021,
+      4.660148237,
+      4.82362063,
+      4.864938313,
+      4.983597158,
+      5.049586485,
+      5.195988793,
+      5.334607918,
+      5.469371281,
+      5.520946801,
+      5.660843327,
+      5.75055961,
+      5.835565213,
+      5.915231485,
+      5.988838211,
+      6.055550011,
+      6.099371554,
+      6.164365119,
+      6.188625718,
+      6.206458729,
+      6.226391955,
+      6.236758642,
+      6.247873098,
+      6.250998597
+    ],
+    "warnings": [
+      "TE3_P1 x-coordinate adjusted from -9.53497 to -9.60142 to keep the C20-C30 segment bounded; TE2-to-TE3 tangent continuity is relaxed for this row."
+    ]
+  },
+  "schema_version": 1,
+  "source_release_manifest_sha256": "24d2f1771fdcab2133239baf14d0972ee46dfc10f02b40bffb2147681a8dba4f"
+}

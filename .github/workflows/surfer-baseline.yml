@@ -1,0 +1,30 @@
+name: FinShape Surfer baseline
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  regression:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install regression dependencies
+        run: >-
+          python -m pip install
+          pytest numpy pandas matplotlib Pillow scipy openpyxl
+          shapely==2.1.2 trimesh==4.11.2
+      - name: Run repository and golden regression tests
+        env:
+          MPLBACKEND: Agg
+        run: python -m pytest -q
+      - name: Run preserved high-resolution non-GUI tests
+        env:
+          MPLBACKEND: Agg
+        run: >-
+          python
+          baselines/FinShape_Surfer_1.2.2/Code/Surfer_validation_1.2.2/test_hq_view_fixes.py

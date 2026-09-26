@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "finshape3d"
+version = "0.1.0"
+description = "FinShape3D: Reconstruct 2D/3D dorsal fins from oblique photographs and ratio tables."
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "numpy",
+    "pandas",
+    "matplotlib",
+    "Pillow",
+    "openpyxl",
+    "scipy",
+    "open3d"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "ruff",
+    "mypy"
+]
+
+[project.urls]
+Homepage = "https://github.com/emorteo/FinShape-Surfer"
+
+[tool.ruff]
+line-length = 120
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q"
+testpaths = [
+    "tests",
+]

@@ -1,0 +1,3 @@
+# Optional surface exporter. Existing measurement/rendering packages unchanged.
+shapely==2.1.2
+trimesh==4.11.2

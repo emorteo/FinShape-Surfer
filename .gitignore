@@ -1,0 +1,100 @@
+# Python bytecode and interpreter caches
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Native extensions
+*.so
+*.dylib
+*.dll
+
+# Virtual environments
+.venv/
+.venv-*/
+venv/
+env/
+ENV/
+env.bak/
+
+# Packaging and installer artifacts
+build/
+dist/
+downloads/
+*.egg-info/
+*.egg
+pip-wheel-metadata/
+wheelhouse/
+
+# Test, coverage, type-checker, and linter caches
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+.mypy_cache/
+.pyright/
+.ruff_cache/
+
+# Jupyter and IPython
+.ipynb_checkpoints/
+.ipython/
+
+# Local configuration, secrets, and logs
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_dsa
+id_ecdsa
+id_ed25519
+credentials*.json
+secrets*.json
+*.log
+*.pid
+
+# Editors and IDEs
+.idea/
+.vscode/
+*.code-workspace
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# Operating-system metadata
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+Desktop.ini
+
+# Local research inputs. Keep the directory, never commit its contents by
+# default; explicitly reviewed public fixtures belong under tests/fixtures/.
+/data/*
+!/data/.gitkeep
+
+# Local generated exports. Versioned validation evidence belongs under the
+# relevant baseline validation directory, not here.
+/outputs/*
+!/outputs/.gitkeep
+
+# Application-generated output directories beside source images or tables
+**/FinShape3D_outputs/
+**/*_FinShape3D_outputs_v*/
+**/*_FinShape2D3D_outputs_v*/
+
+# Generated release packages and temporary test output
+**/FinShape_Surfer_*_release.zip
+/tests/output/
+
+# Do not add blanket image, CSV, JSON, SVG, mesh, or archive exclusions here.
+# The repository intentionally versions reviewed assets, golden fixtures, and
+# validation evidence in those formats.
