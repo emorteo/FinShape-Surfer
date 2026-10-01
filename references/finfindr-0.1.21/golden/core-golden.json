@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "upstream": {
+    "repository": "https://github.com/haimeh/finFindR.git",
+    "commit": "5d7babd208af9642e440ef9143ec679c1154ff91",
+    "declared_version": "0.1.21",
+    "source_sha256": {
+      "DESCRIPTION": "ac85dd524a944e064c69adc498f34ff52c224a910cd5aa45aa423a37332ed33d",
+      "R/pathEncoding.R": "5c40735d87c92919b9b78e35b68461325fc6b06836b08a72cc3257ae73026130",
+      "R/extractFeatures.R": "29f44e5ee1ed5190d03c9ec8eceffff56741570bc0b1086d8858881bb63a72bc",
+      "R/compare.R": "4e9950eb5cff01ce2f0a5b66bedba1c350f0a184e99fe311108a79ee2b9fa514",
+      "R/blobber.R": "e2a05fc08f3b122811b5b9e155635f40dadafd5f070966c0bcdf2c4d71f5f4d9",
+      "src/astar.cpp": "145dacb71d3acc530dea15b238bbbb164516a18df06642d59fba81e3a326707b",
+      "src/chromaAnnulus.cpp": "729baca59ef700ea889a569624c3b4323b8ca30ff3cb0275dd7fd36421092d34",
+      "src/imageToFeatureProcessing.cpp": "1153e0ffd7a1408a6dc3e68368c6fc970020116a8588778736700ecce4011791"
+    }
+  },
+  "environment": {
+    "r_version": "4.5.2",
+    "platform": "aarch64-apple-darwin20",
+    "packages": {
+      "Rcpp": "1.1.2",
+      "imager": "1.0.8",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39",
+      "renv": "1.2.4"
+    }
+  },
+  "coverage": {
+    "verified": ["path encoding", "distance comparison", "A* path search", "non-maximum edge suppression", "annulus extraction", "glare filling", "bounded image resize"],
+    "blocked": [
+      "MXNet fin detection",
+      "MXNet learned trailing-edge segmentation",
+      "MXNet triplet embedding",
+      "catalog matching based on learned embeddings",
+      "Shiny application workflows"
+    ]
+  },
+  "results": {
+    "path_encoding": {
+      "encoded": [10, 20, 4, 1, 2, 1, 2, 1, 2, 1, 1, 0, 1, 0, 1, 0, 1, 0],
+      "decoded": [
+        [10, 20],
+        [11, 20],
+        [12, 21],
+        [13, 22],
+        [14, 22],
+        [14, 23],
+        [15, 24],
+        [16, 24]
+      ],
+      "exact_roundtrip": true
+    },
+    "distance_to_reference": [
+      0,
+      5.47722557505166,
+      4.47213595499958
+    ],
+    "astar_path": {
+      "directions": [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+      "length": 33
+    },
+    "edge_map": {
+      "dimensions": [15, 15, 1, 1],
+      "length": 225,
+      "minimum": 0,
+      "maximum": 1,
+      "mean": 0.0310222222222222,
+      "sha256": "430620255f68b8f79e7eb47224b2cadc534f7333cef4478935c7ba4e2bd5c215",
+      "nonzero_pixels": 13
+    },
+    "annulus": {
+      "dimensions": [140, 16, 1, 3],
+      "length": 6720,
+      "minimum": 0.221664734198,
+      "maximum": 0.780536523664,
+      "mean": 0.528930817610053,
+      "sha256": "12f649f624656c52cb02e463a55f20549932c916bde871705409182e6f99a2b2"
+    },
+    "filled_glare": {
+      "dimensions": [180, 160, 1, 3],
+      "length": 86400,
+      "minimum": 0,
+      "maximum": 1,
+      "mean": 0.5,
+      "sha256": "77820f296c3bc44b06d3d3b4994f873e0cac87912d98bd8d1ee220e76b61cbc3",
+      "zero_pixels_before": 28,
+      "zero_pixels_after": 1,
+      "changed_pixels": 27
+    },
+    "resized_image": {
+      "dimensions": [120, 107, 1, 3],
+      "length": 38520,
+      "minimum": 0.001567155493,
+      "maximum": 0.998432844507,
+      "mean": 0.5,
+      "sha256": "d827db59b7bcea1f7762b832582d5174c314976ee7aca75a86b10c201bc2f3b8"
+    }
+  }
+}

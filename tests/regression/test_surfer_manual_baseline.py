@@ -6,12 +6,11 @@ import hashlib
 import importlib.util
 import json
 import os
-from pathlib import Path
 import sys
 import unittest
+from pathlib import Path
 
 import numpy as np
-
 
 os.environ.setdefault("MPLBACKEND", "Agg")
 ROOT = Path(__file__).resolve().parents[2]
@@ -38,6 +37,7 @@ def array_sha256(values, decimals: int = 12) -> str:
 fin2d = load_module("finshape_2d_2_0_20_regression", CODE / "FinShape2D_R-GUI_2.0.20.py")
 fin3d = load_module("finshape_3d_1_1_20_regression", CODE / "FinShape3D_1.1.20.py")
 integrated = load_module("finshape_surfer_1_1_3_regression", CODE / "FinShape_Surfer_GUI_1.1.3.py")
+cfd = load_module("finshape_cfd_0_1_0_regression", CODE / "FinShapeCFD_0.1.0.py")
 golden = json.loads(GOLDEN_PATH.read_text(encoding="utf-8"))
 
 
@@ -166,6 +166,41 @@ class SurferManualBaselineTests(unittest.TestCase):
             "save_measurement", "generate_integrated_outputs", "export_surface_dialog",
         ):
             self.assertNotIn(method, current.IntegratedFinShapeApp.__dict__)
+
+    def test_cfd_input_preserves_every_measured_bezier_boundary_sample(self):
+        landmarks = fixture_landmarks()
+        controls = fin2d.build_initial_controls(landmarks)
+        outline = fin2d.outline_polygon(controls, n_per_seg=234)
+        standardized = np.asarray(
+            fin2d.standardize_contour_units(
+                outline, landmarks.B, landmarks.A, landmarks.C30, ab_units=10.0
+            ),
+            dtype=float,
+        )
+        landmark_points = {
+            name: np.asarray(
+                fin2d.standardize_contour_units(
+                    np.asarray([getattr(landmarks, name)], dtype=float),
+                    landmarks.B,
+                    landmarks.A,
+                    landmarks.C30,
+                    ab_units=10.0,
+                )[0],
+                dtype=float,
+            )
+            for name in ("A", "B", "C30")
+        }
+        data = {
+            "schema": "finshape.surface-input/1",
+            "curves": {"outline": standardized.tolist()},
+            "landmarks": {name: point.tolist() for name, point in landmark_points.items()},
+        }
+
+        polygon, accepted, _ = cfd._polygon_from_input(data)
+        xy, _faces, _boundary = cfd._triangulate(polygon, subdivisions=0)
+
+        np.testing.assert_array_equal(accepted, standardized)
+        self.assertTrue(all(np.any(np.all(xy == point, axis=1)) for point in accepted))
 
 
 if __name__ == "__main__":

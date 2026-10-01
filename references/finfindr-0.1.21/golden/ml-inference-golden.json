@@ -1,0 +1,25 @@
+{
+  "status": "FinShape Surfer adapter regression fixture; not independently verified MXNet parity",
+  "input": "float32 linear gradient from 0 through 1 in NCHW order",
+  "crop": {
+    "shape": [1, 2, 150, 225],
+    "minimum": 1.377722602668996e-09,
+    "maximum": 0.024871068075299263,
+    "mean": 0.001051402068696916,
+    "channel_means": [0.0018668341217562556, 0.00023596998653374612]
+  },
+  "edge": {
+    "shape": [1, 6, 140, 200],
+    "minimum": 2.3180812149803387e-06,
+    "maximum": 0.9998188614845276,
+    "mean": 0.1666666716337204,
+    "channel_means": [
+      0.9966665506362915,
+      0.0016766722546890378,
+      0.0007300623692572117,
+      0.0005651371902786195,
+      0.0001740961306495592,
+      0.0001874592708190903
+    ]
+  }
+}

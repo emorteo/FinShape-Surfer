@@ -1,0 +1,15 @@
+{
+  "upstream_repository": "https://github.com/haimeh/finFindR.git",
+  "upstream_commit": "5d7babd208af9642e440ef9143ec679c1154ff91",
+  "declared_package_version": "0.1.21",
+  "version_resolution": "First upstream commit whose DESCRIPTION declares Version 0.1.21; upstream has no 0.1.21 tag.",
+  "upstream_license": "GPL (>= 2)",
+  "golden_scope": "Deterministic non-MXNet R and C++ core functions with synthetic inputs",
+  "excluded_scope": [
+    "MXNet fin detection",
+    "MXNet learned trailing-edge segmentation",
+    "MXNet triplet embedding",
+    "catalog matching based on learned embeddings",
+    "Shiny application workflows"
+  ]
+}

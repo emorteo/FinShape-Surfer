@@ -98,3 +98,16 @@ Desktop.ini
 # Do not add blanket image, CSV, JSON, SVG, mesh, or archive exclusions here.
 # The repository intentionally versions reviewed assets, golden fixtures, and
 # validation evidence in those formats.
+
+# R and renv local state
+.Rhistory
+.RData
+.Ruserdata
+.Rproj.user/
+renv/library/
+renv/staging/
+renv/python/
+
+# Downloaded/compiled FinFindR reference state. The pinned source identity and
+# committed golden results live under references/; local source and binaries do not.
+references/finfindr-0.1.21/.reference/
