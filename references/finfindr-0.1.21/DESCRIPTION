@@ -1,0 +1,14 @@
+Package: finfindr.reference
+Type: Project
+Title: FinFindR 0.1.21 Golden Reference Harness
+Version: 0.1.0
+Description: Reproducible, synthetic reference cases for selected deterministic
+    FinFindR 0.1.21 core algorithms. This is not a reimplementation of FinFindR.
+License: MIT
+Encoding: UTF-8
+Imports:
+    digest,
+    imager,
+    jsonlite,
+    Rcpp,
+    renv

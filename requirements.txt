@@ -6,6 +6,9 @@ openpyxl
 scipy
 pytest
 open3d
+# Experimental closed-surface export and high-resolution photo display
+shapely==2.1.2
+trimesh==4.11.2
 # dev extras
 ruff
 mypy
