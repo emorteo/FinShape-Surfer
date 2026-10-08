@@ -446,7 +446,13 @@ def test_interactive_photo_preview_is_bounded_but_export_keeps_full_dimensions(m
         )
 
     monkeypatch.setattr(surfer_gui, "render_smooth_photo_frame", render)
-    proxy = _HQDisplayProxy(SimpleNamespace(VERSION="test"))
+    def project_vertices(vertices, _width, _height, **_kwargs):
+        points = np.asarray(vertices, dtype=float)
+        return points[:, :2] * 20 + 64, points[:, 2]
+
+    proxy = _HQDisplayProxy(SimpleNamespace(
+        VERSION="test", project_vertices=project_vertices
+    ))
     full_scene = object()
     motion_scene = object()
     proxy._motion_scenes[id(full_scene)] = motion_scene
@@ -469,7 +475,7 @@ def test_interactive_photo_preview_is_bounded_but_export_keeps_full_dimensions(m
     assert preview.supersample == 2
     assert calls[1][0] is motion_scene
     assert calls[1][1] * calls[1][2] <= INTERACTIVE_MOTION_MAX_PIXELS
-    assert calls[1][3] == 1
+    assert calls[1][3] == 2
     assert motion.image.size == (1400, 1000)
     assert calls[2] == (full_scene, 1920, 1440, 2)
     assert export.image.size == (1920, 1440)

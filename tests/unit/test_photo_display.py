@@ -1,4 +1,5 @@
 from dataclasses import dataclass, replace
+from pathlib import Path
 from types import SimpleNamespace
 from typing import ClassVar
 
@@ -13,9 +14,18 @@ from core.rendering.airfoil_surface import (
     airfoil_mesh_strategy,
     rebuild_texture_scene_airfoil,
 )
-from core.rendering.photo_display import render_smooth_photo_frame
+from core.rendering.photo_display import (
+    draw_photo_axis_guide,
+    photo_axis_directions,
+    render_smooth_photo_frame,
+    simplified_motion_outline,
+)
 from core.rendering.photo_mask import PhotoMaskTextureProxy, photo_mask_snapshot
-from finshape_surfer_gui import _HQDisplayProxy
+from finshape_surfer_gui import (
+    INTERACTIVE_MOTION_MAX_PIXELS,
+    _HQDisplayProxy,
+    _install_low_latency_motion_scheduler,
+)
 
 
 @dataclass(frozen=True)
@@ -291,6 +301,140 @@ def test_anatomical_side_mapping_is_left_positive_z_right_negative_z():
     assert proxy.retarget_photo_side(scene, "right").textured_skin == "negative_z_skin"
 
 
+def test_motion_scene_contains_only_the_selected_photo_skin():
+    scene = Scene(
+        faces=np.array([[0, 1, 2], [3, 4, 5], [0, 2, 4]], dtype=int),
+        face_labels=np.array(["positive_z_skin", "negative_z_skin", "edge_wall"]),
+        textured_skin="positive_z_skin",
+        vertices=np.zeros((6, 3), dtype=float),
+        face_colors=np.ones((3, 4), dtype=float),
+        outline=np.zeros((3, 2), dtype=float),
+    )
+
+    motion = _HQDisplayProxy._motion_scene(scene)
+
+    np.testing.assert_array_equal(motion.faces, np.array([[0, 1, 2]], dtype=int))
+    np.testing.assert_array_equal(motion.face_labels, np.array(["positive_z_skin"]))
+
+
+def test_motion_outline_reduces_subpixel_samples_without_losing_notch():
+    leading_fraction = np.linspace(0.0, 1.0, 1001)
+    trailing_fraction = np.linspace(0.0, 1.0, 1001)[1:]
+    leading = np.column_stack((
+        -6.0 * leading_fraction,
+        8.0 * leading_fraction + 0.2 * np.sin(np.pi * leading_fraction),
+    ))
+    trailing = np.column_stack((
+        -6.0 - 2.0 * trailing_fraction
+        + 0.15 * np.exp(-((trailing_fraction - 0.4) / 0.03) ** 2),
+        8.0 * (1.0 - trailing_fraction),
+    ))
+    source = np.vstack((leading, trailing))
+    assert Polygon(source).is_valid
+
+    preview = simplified_motion_outline(source)
+
+    assert len(preview) < len(source) // 4
+    np.testing.assert_array_equal(preview[[0, -1]], source[[0, -1]])
+    assert Polygon(preview).is_valid
+    assert Polygon(source).boundary.hausdorff_distance(Polygon(preview).boundary) <= 0.00275
+    notch = trailing[np.argmin(np.abs(trailing_fraction - 0.4))]
+    assert Polygon(preview).boundary.distance(Point(notch)) <= 0.00275
+    np.testing.assert_array_equal(source[[0, -1]], [[0, 0], [-8, 0]])
+
+
+def test_photo_axis_guide_tracks_renderer_projection_and_does_not_mutate_frame():
+    from finshape_surfer_gui import _load_module, baseline
+
+    renderer = _load_module(
+        "photo_axis_projection_renderer",
+        Path(baseline.__file__).with_name("FinShapeTextureHQ_0.2.0.py"),
+    )
+    front, _ = photo_axis_directions(
+        renderer.project_vertices, pitch=0.0, yaw=0.0, roll=0.0
+    )
+    side, _ = photo_axis_directions(
+        renderer.project_vertices, pitch=0.0, yaw=90.0, roll=0.0
+    )
+    assert np.linalg.norm(front[0]) < 1e-10
+    assert front[1, 1] < -0.9
+    assert front[2, 0] > 0.9
+    assert side[0, 0] < -0.9
+    assert np.linalg.norm(side[2]) < 1e-10
+
+    blank = Image.new("RGB", (320, 240), (248, 249, 250))
+    guided = draw_photo_axis_guide(
+        blank, renderer.project_vertices, pitch=0.0, yaw=90.0, roll=0.0
+    )
+    assert np.any(np.asarray(guided) != np.asarray(blank))
+    assert np.all(np.asarray(blank) == (248, 249, 250))
+    assert np.all(np.asarray(guided)[0:100, 150:300] == (248, 249, 250))
+
+
+def test_motion_frame_is_sharper_and_export_has_no_axis_guide(monkeypatch):
+    import finshape_surfer_gui as gui
+    from finshape_surfer_gui import _load_module, baseline
+
+    renderer = _load_module(
+        "photo_axis_export_renderer",
+        Path(baseline.__file__).with_name("FinShapeTextureHQ_0.2.0.py"),
+    )
+
+    @dataclass(frozen=True)
+    class Result:
+        image: Image.Image
+        render_seconds: float
+        textured_pixels: int
+        output_pixels: int
+        supersample: int
+
+    calls = []
+
+    def fake_render(_renderer, _scene, width, height, **options):
+        calls.append((width, height, options["supersample"]))
+        return Result(
+            Image.new("RGB", (width, height), (248, 249, 250)),
+            0.01, 0, width * height, options["supersample"],
+        )
+
+    monkeypatch.setattr(gui, "render_smooth_photo_frame", fake_render)
+    proxy = _HQDisplayProxy(SimpleNamespace(
+        VERSION="test", project_vertices=renderer.project_vertices
+    ))
+    proxy.set_interactive_motion(True)
+    moving = proxy.render_hq_frame(
+        object(), 1400, 1000, pitch=0.0, yaw=90.0, roll=0.0, supersample=2
+    )
+    assert calls[0][0] * calls[0][1] <= INTERACTIVE_MOTION_MAX_PIXELS
+    assert calls[0][0] * calls[0][1] > 340_000
+    assert calls[0][2] == 2
+    assert moving.image.size == (1400, 1000)
+    assert np.any(np.asarray(moving.image)[-120:, :140] != (248, 249, 250))
+
+    saved = proxy.render_hq_frame(
+        object(), 1920, 1440, pitch=0.0, yaw=90.0, roll=0.0, supersample=2
+    )
+    assert calls[-1] == (1920, 1440, 2)
+    assert np.all(np.asarray(saved.image) == (248, 249, 250))
+
+
+def test_motion_scheduler_shortens_only_photo_debounce():
+    calls = []
+
+    class Window:
+        def after(self, *args):
+            calls.append(args)
+            return "timer"
+
+    window = Window()
+    _install_low_latency_motion_scheduler(window)
+
+    window.after(140, "render")
+    window.after(220, "resize")
+
+    assert calls == [(35, "render"), (220, "resize")]
+
+
 def test_photo_renderer_draws_only_selected_skin_at_tangent_views():
     calls = []
 
@@ -377,3 +521,143 @@ def test_photo_mask_proxy_adapts_only_the_texture_renderer_input():
     assert len(rebuilt.faces) == 51_200
     assert captured[0]["curves"] == source["photo_mask_curves"]
     assert source["curves"]["outline"][1] == [-4, 5]
+
+
+def test_below_base_photo_edge_keeps_detected_notches_and_passes_surface_validator():
+    from finshape_surfer_gui import _load_module, baseline
+
+    exporter = _load_module(
+        "photo_mask_base_validator",
+        Path(baseline.__file__).with_name("FinShapeCFD_0.1.0.py"),
+    )
+    calls = []
+
+    class Renderer:
+        VERSION = "test"
+
+        def build_texture_scene(self, snapshot, surface_exporter, _side, **_kwargs):
+            calls.append(snapshot)
+            surface_exporter._polygon_from_input({
+                "schema": "finshape.surface-input/1",
+                "curves": snapshot["curves"],
+                "landmarks": snapshot["standardized_landmarks"],
+            })
+            return _scene_from_outline(snapshot["curves"]["outline"])
+
+    proxy = PhotoMaskTextureProxy(Renderer())
+    detected = [
+        [0, 0], [-2, 4], [-6, 8], [-6.4, 6], [-7, 5.5],
+        [-6.5, 5], [-7.5, 2], [-8.1, -0.2], [-8, 0],
+    ]
+    image_detected = [[100 + 10 * x, 100 - 10 * y] for x, y in detected]
+    source = {
+        "curves": {"outline": [[0, 0], [-6, 8], [-8, 0]]},
+        "standardized_landmarks": {"B": [0, 0], "A": [-6, 8], "C30": [-8, 0]},
+        "image_landmarks": {"B": [100, 100], "A": [40, 20], "C30": [20, 100]},
+        "image_outline": [[100, 100], [40, 20], [20, 100]],
+        "flip_applied": False,
+        "working_image": Image.new("RGB", (160, 160), (30, 50, 70)),
+        "photo_mask_curves": {"outline": detected},
+        "photo_mask_image_outline": image_detected,
+        "photo_mask_provenance": {"color_boundary_model": "robust CIE Lab tissue/water"},
+    }
+
+    scene = proxy.build_texture_scene(source, exporter, "left")
+
+    assert calls[0]["photo_mask_applied"] is True
+    assert len(calls) == 1
+    assert calls[0]["photo_mask_provenance"] == source["photo_mask_provenance"]
+    assert calls[0]["photo_mask_base_clipped"] is True
+    assert calls[0]["curves"]["outline"] != source["curves"]["outline"]
+    assert [-7, 5.5] in calls[0]["curves"]["outline"]
+    assert min(point[1] for point in scene.outline) >= 0
+    np.testing.assert_allclose(
+        calls[0]["image_outline"],
+        [[100 + 10 * x, 100 - 10 * y] for x, y in calls[0]["curves"]["outline"]],
+        atol=1e-10,
+    )
+    assert source["photo_mask_curves"]["outline"] == detected
+
+    texture = _load_module(
+        "photo_mask_texture_renderer",
+        Path(baseline.__file__).with_name("FinShapeTexture_0.1.0.py"),
+    )
+    real_scene = PhotoMaskTextureProxy(texture).build_texture_scene(
+        source, exporter, "left", subdivisions=0
+    )
+    assert len(real_scene.faces) > 0
+    assert [-7, 5.5] in real_scene.outline.tolist()
+    rendered_planform = Polygon(real_scene.outline)
+    assert rendered_planform.covers(Point(-6.7, 5.5))
+    assert not rendered_planform.covers(Point(-6.7, 5.05))
+
+
+def test_terminal_base_crossing_splices_only_measured_attachment_tail():
+    from finshape_surfer_gui import _load_module, baseline
+
+    measured = [
+        [0, 0], [-2, 4], [-6, 8], [-6.4, 6], [-7.2, 3],
+        [-7.5, 0.15], [-8, 0],
+    ]
+    detected = [
+        [0, 0], [-2, 4], [-6, 8], [-6.4, 6], [-7, 5.5],
+        [-6.5, 5], [-7.2, 3], [-7.35, 0.15], [-7.4, 0.06],
+        [-7.45, -0.02], [-8, 0],
+    ]
+    def to_image(points):
+        return [[100 + 10 * x, 100 - 10 * y] for x, y in points]
+
+    source = {
+        "curves": {"outline": measured},
+        "image_outline": to_image(measured),
+        "photo_mask_curves": {"outline": detected},
+        "photo_mask_image_outline": to_image(detected),
+        "standardized_landmarks": {"B": [0, 0], "A": [-6, 8], "C30": [-8, 0]},
+        "image_landmarks": {"B": [100, 100], "A": [40, 20], "C30": [20, 100]},
+        "flip_applied": False,
+        "working_image": Image.new("RGB", (160, 160), (30, 50, 70)),
+        "photo_mask_provenance": {"color_boundary_model": "robust CIE Lab tissue/water"},
+    }
+
+    adapted = photo_mask_snapshot(source)
+    assert adapted["photo_mask_applied"] is True
+    assert adapted["photo_mask_base_clipped"] is True
+    assert adapted["photo_mask_terminal_measured_splice"] is True
+    assert [-7, 5.5] in adapted["curves"]["outline"]
+    assert adapted["curves"]["outline"][-1] == [-8, 0]
+    assert min(point[1] for point in adapted["curves"]["outline"]) >= 0
+    np.testing.assert_allclose(adapted["image_outline"], to_image(adapted["curves"]["outline"]))
+    assert source["curves"]["outline"] == measured
+    assert source["photo_mask_curves"]["outline"] == detected
+
+    exporter = _load_module(
+        "photo_mask_terminal_validator",
+        Path(baseline.__file__).with_name("FinShapeCFD_0.1.0.py"),
+    )
+    texture = _load_module(
+        "photo_mask_terminal_texture",
+        Path(baseline.__file__).with_name("FinShapeTexture_0.1.0.py"),
+    )
+    scene = PhotoMaskTextureProxy(texture).build_texture_scene(
+        source, exporter, "left", subdivisions=0
+    )
+    assert len(scene.faces) > 0
+    assert [-7, 5.5] in scene.outline.tolist()
+    assert Polygon(scene.outline).is_valid
+
+
+def test_large_below_base_photo_edge_requires_review_instead_of_whole_curve_fallback():
+    source = {
+        "curves": {"outline": [[0, 0], [-6, 8], [-8, 0]]},
+        "image_outline": [[100, 100], [40, 20], [20, 100]],
+        "photo_mask_curves": {
+            "outline": [[0, 0], [-6, 8], [-7, 3], [-7.5, -1], [-8, 0]]
+        },
+        "photo_mask_image_outline": [
+            [100, 100], [40, 20], [30, 70], [25, 110], [20, 100]
+        ],
+    }
+
+    with np.testing.assert_raises_regex(ValueError, "review the edge or landmarks"):
+        photo_mask_snapshot(source)
+    assert source["curves"]["outline"] == [[0, 0], [-6, 8], [-8, 0]]

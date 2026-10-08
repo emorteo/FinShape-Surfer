@@ -21,8 +21,9 @@ GUI (`finshape_surfer_gui.py`) or call the library functions directly (see
 - Python 3.8 or newer
 - Recommended: create a virtual environment
 
-Optional (improves GUI functionality):
-- `Pillow` — image transforms, raster export
+`Pillow` is a declared dependency for image transforms and raster export.
+Experimental FinFindR inference and closed-surface export require the
+additional `full` profile described below.
 
 Install dependencies (recommended):
 ```bash
@@ -71,7 +72,13 @@ Landmarks are placed in the order `A -> B -> C30 -> C20 -> C10 -> C5 -> D`.
 The measured landmarks, Bezier controls, CSV values, and CFD boundary remain
 authoritative. The reviewed B-to-A-to-C30 contour is used by Photo-ID display
 masking to remove residual water and preserve identity-bearing nicks and
-notches; it does not replace the measured morphometry.
+notches; it does not replace the measured morphometry. Without an edge
+suggestion, Photo-ID uses the measured Bezier outline. A reviewed edge that
+crosses below the attachment base is clipped for display. If the clipped
+outline is invalid and the excursion is a short terminal dip, only that tail
+may be spliced to the measured curve. An outline that still cannot form one
+valid fin raises a review error rather than silently replacing the complete
+detected edge.
 
 The workflow credits are displayed in the corresponding rows: image
 algorithms are attributed to FinShape2D R-GUI 2.0.20, Eduardo Morteo, and
@@ -79,15 +86,26 @@ Rodrigo Morteo; morphometric ratios to David Weller and Eduardo Morteo in
 Morteo et al. (2017); and assisted vision to FinFindR 0.1.21 and Jaime
 Thompson.
 
-Version 1.3.13 changes only interactive Photo-ID rendering and the display tip
-closure. While Pitch, Yaw, Roll, or direct drag is active, Photo-ID uses a
-120,000-pixel, single-sample preview on a cached boundary-preserving display
-mesh; releasing the control immediately restores the existing full mesh,
-420,000-pixel, 2x-antialiased view. Saved 1920 x 1440 output is unchanged. The
-ruled tip retains its measured planform targets and wire
-topology, but now closes thickness on a quarter-elliptic envelope instead of a
-linear taper, producing a convex airfoil-like end profile. Measurement, Bezier,
-Photo-ID masking, and CFD export geometry remain unchanged.
+Version 1.3.13 uses a cached Photo-ID preview of only the selected photographed
+skin during Pitch, Yaw, Roll, and direct drag. The moving preview is built from
+the current Photo-ID mask, if present, and its boundary uses a 0.0025-AB-unit
+simplification tolerance with a validity and deviation check. It renders at up to
+350,000 pixels with 2x antialiasing, then scales to the window size; the latest
+slider position is scheduled after a 35 ms delay. Releasing the control
+restores the full display mesh, rendered within a 420,000-pixel interactive
+buffer with 2x antialiasing. A projected X/Y/Z orientation guide follows the
+same camera as the fin in the interactive Photo-ID view. Saved 1920 x 1440
+photos use the full mesh and 2x antialiasing, without that guide. The ruled
+tip keeps its measured planform targets and wire topology while closing
+thickness on a convex quarter-elliptic envelope. Neither preview nor guide
+changes measurement, Bezier, Photo-ID mask, or CFD export geometry.
+
+The airfoil-style 3D reconstruction is a display assumption, not a measured
+thickness profile or a substitute for the separate experimental CFD exporter.
+See [FinFindR-assisted vision](docs/FINFINDR_ASSISTED_VISION.md) for the mask
+rules, geometry boundaries, and validation limits.
+
+## Version history
 
 Version 1.3.12 replaces the insufficient apex-omission rule with a closed,
 ruled airfoil-tip grid. Longitudinal rails continue from one common body chord
@@ -190,7 +208,9 @@ python finshape_surfer_gui.py
 
 Versioned outputs are written next to the source image in
 `<image-stem>_FinShape2D3D_outputs_v1.3.13/`. The CFD export remains separate
-from the display-only airfoil-style Photo-ID reconstruction.
+from the display-only airfoil-style Photo-ID reconstruction. The interactive
+X/Y/Z guide and reduced motion preview are not part of saved high-resolution
+photos or CFD surfaces.
 
 ## Programmatic usage
 If you want to run reconstruction from a script or pipeline, use the library API:

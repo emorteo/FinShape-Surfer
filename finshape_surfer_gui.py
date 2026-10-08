@@ -29,7 +29,10 @@ from core.rendering.airfoil_surface import (
 )
 from core.rendering.photo_display import (
     DISPLAY_THICKNESS_SCALE,
+    MOTION_OUTLINE_TOLERANCE,
+    draw_photo_axis_guide,
     render_smooth_photo_frame,
+    simplified_motion_outline,
 )
 from core.rendering.photo_mask import PhotoMaskTextureProxy
 
@@ -43,10 +46,12 @@ MORPHOMETRY_CREDIT = (
     "Ratios by David Weller & Eduardo Morteo, in: Morteo et al. (2017)"
 )
 INTERACTIVE_PHOTO_MAX_PIXELS = 420_000
-INTERACTIVE_MOTION_MAX_PIXELS = 120_000
-MOTION_PREVIEW_SPAN_STATIONS = 65
-MOTION_PREVIEW_CHORD_STATIONS = 13
-MOTION_PREVIEW_BOUNDARY_MIN_TRIANGLES = 600
+INTERACTIVE_MOTION_MAX_PIXELS = 350_000
+MOTION_PREVIEW_SUPERSAMPLE = 2
+MOTION_PREVIEW_SPAN_STATIONS = 41
+MOTION_PREVIEW_CHORD_STATIONS = 9
+MOTION_PREVIEW_BOUNDARY_MIN_TRIANGLES = 300
+MOTION_RENDER_DELAY_MS = 35
 TIP_CAP_START_FRACTION = 0.84
 TIP_CAP_RING_PARAMETERS = (0.20, 0.40, 0.60, 0.80)
 ROOT = Path(__file__).resolve().parent
@@ -468,6 +473,23 @@ def _clean_measurement_example(image):
     return cleaned
 
 
+def _install_low_latency_motion_scheduler(window) -> None:
+    """Shorten only the frozen Photo-ID motion debounce on this window."""
+
+    original_after = window.after
+
+    def after(delay_ms, callback=None, *args):
+        try:
+            is_photo_debounce = int(delay_ms) == 140
+        except (TypeError, ValueError):
+            is_photo_debounce = False
+        if callback is not None and is_photo_debounce:
+            delay_ms = MOTION_RENDER_DELAY_MS
+        return original_after(delay_ms, callback, *args)
+
+    window.after = after
+
+
 class _HQDisplayProxy:
     """Delegate to the frozen renderer while applying display-only corrections."""
 
@@ -485,17 +507,30 @@ class _HQDisplayProxy:
 
         self._interactive_motion = bool(active)
 
+    @staticmethod
+    def _motion_scene(scene):
+        """Keep only the photographed skin in the transient motion scene."""
+
+        labels = np.asarray(scene.face_labels)
+        faces = np.asarray(scene.faces)
+        selected = labels == str(scene.textured_skin)
+        return replace(scene, faces=faces[selected], face_labels=labels[selected])
+
     def build_hq_scene(self, base_scene, snapshot, base_renderer):
         scene = self._renderer.build_hq_scene(base_scene, snapshot, base_renderer)
         scene = self._retarget_scene(scene, scene.photo_side)
         preview_base = rebuild_texture_scene_airfoil(
-            base_scene,
+            replace(
+                base_scene,
+                outline=simplified_motion_outline(base_scene.outline),
+            ),
             span_stations=MOTION_PREVIEW_SPAN_STATIONS,
             chord_stations=MOTION_PREVIEW_CHORD_STATIONS,
             boundary_min_triangles=MOTION_PREVIEW_BOUNDARY_MIN_TRIANGLES,
         )
         preview = self._renderer.build_hq_scene(preview_base, snapshot, base_renderer)
-        self._motion_scenes[id(scene)] = self._retarget_scene(preview, scene.photo_side)
+        preview = self._retarget_scene(preview, scene.photo_side)
+        self._motion_scenes[id(scene)] = self._motion_scene(preview)
         return scene
 
     @staticmethod
@@ -512,8 +547,8 @@ class _HQDisplayProxy:
         preview = self._motion_scenes.get(id(scene))
         retargeted = self._retarget_scene(scene, photo_side)
         if preview is not None:
-            self._motion_scenes[id(retargeted)] = self._retarget_scene(
-                preview, photo_side
+            self._motion_scenes[id(retargeted)] = self._motion_scene(
+                self._retarget_scene(preview, photo_side)
             )
         return retargeted
 
@@ -539,20 +574,23 @@ class _HQDisplayProxy:
             render_height = max(64, math.floor(requested_height * scale))
         render_options = dict(kwargs)
         if is_motion_preview:
-            render_options["supersample"] = 1
+            render_options["supersample"] = MOTION_PREVIEW_SUPERSAMPLE
         result = render_smooth_photo_frame(
             self._renderer, render_scene, render_width, render_height, **render_options
         )
-        if (render_width, render_height) == (requested_width, requested_height):
-            return result
-        preview = result.image.resize(
-            (requested_width, requested_height),
-            (
-                fin2d.Image.Resampling.BILINEAR
-                if is_motion_preview
-                else fin2d.Image.Resampling.LANCZOS
-            ),
-        )
+        preview = result.image
+        if (render_width, render_height) != (requested_width, requested_height):
+            preview = preview.resize(
+                (requested_width, requested_height), fin2d.Image.Resampling.LANCZOS
+            )
+        if not is_export:
+            preview = draw_photo_axis_guide(
+                preview,
+                self._renderer.project_vertices,
+                pitch=float(render_options["pitch"]),
+                yaw=float(render_options["yaw"]),
+                roll=float(render_options["roll"]),
+            )
         return replace(
             result,
             image=preview,
@@ -579,9 +617,11 @@ class _HQDisplayProxy:
             "interactive_motion_preview": {
                 "temporary_only": True,
                 "maximum_pixels": INTERACTIVE_MOTION_MAX_PIXELS,
-                "supersample": 1,
+                "boundary_tolerance_ab_units": MOTION_OUTLINE_TOLERANCE,
+                "supersample": MOTION_PREVIEW_SUPERSAMPLE,
                 "saved_output_changed": False,
             },
+            "interactive_orientation_guide": "projected X/Y/Z axes; excluded from saved photo",
         })
         return metadata
 
@@ -1422,6 +1462,7 @@ class IntegratedFinShapeApp(baseline.IntegratedFinShapeApp):
         window = controls.get("window")
         if window is None:
             return
+        _install_low_latency_motion_scheduler(window)
 
         def descendants(widget):
             for child in widget.winfo_children():

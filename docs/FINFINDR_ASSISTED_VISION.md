@@ -63,6 +63,24 @@ The application deliberately keeps three products separate:
    retaining visible nicks and notches. It is display geometry, not a
    replacement CFD surface.
 
+Without a reviewed edge, Photo-ID uses the measured Bezier outline. When a
+reviewed path dips below the B-to-C30 attachment base, its below-base segments
+are clipped at that base before building the photo mesh. The clipped contour
+retains aligned source-image coordinates and valid detected edge points,
+including color-guided notch detail. If the clipped polygon is invalid and a
+short terminal dip satisfies the repair checks, only the invalid attachment
+tail is joined to the operator's measured curve; output metadata records this
+local splice. An outline that still cannot form one valid fin is reported for
+review; the renderer does not silently replace the whole detected edge with measured
+Beziers. CFD inputs are untouched.
+
+The Photo-ID mesh is reconstructed from that display outline, so the moving
+camera preview and the released high-resolution view use the same reviewed
+boundary. The preview may simplify subpixel contour samples for speed; it
+never changes the stored outline, the saved full-resolution photo, or the CFD
+surface. Tissue/water color contrast helps propose the contour, but it is not
+an independent per-pixel segmentation applied after the operator's review.
+
 ## Installation
 
 Install FinShape Surfer with the complete GUI dependency profile:
@@ -270,12 +288,19 @@ from 1.3.5 are:
   contour. This is display geometry only; measurement and CFD geometry do not
   change.
 - Active Pitch, Yaw, Roll, and direct-drag motion uses a cached,
-  boundary-preserving display mesh with a 120,000-pixel, single-sample Photo-ID
-  preview. The reduced preview preserves the reviewed boundary while using
-  fewer span/chord stations so camera controls remain responsive. Control
-  release requests the unchanged full mesh at 420,000 pixels and 2x
+  selected-skin display mesh derived from the current Photo-ID mask, when one
+  exists. A 0.0025-AB-unit contour simplification tolerance, followed by
+  polygon-validity and boundary-deviation checks, removes only fine boundary
+  samples from this transient mesh;
+  the original measured and reviewed contours remain intact. The moving frame
+  is rendered at up to 350,000 pixels with 2x antialiasing and scaled to the
+  window. The latest slider position is scheduled after a 35 ms delay. Control
+  release requests the full mesh in a 420,000-pixel interactive buffer with 2x
   antialiasing. The 1920 x 1440 saved image path remains full resolution, full
   mesh, and 2x antialiased.
+- The interactive Photo-ID image includes an X/Y/Z orientation guide computed
+  with the same camera projection as the fin. It changes with Pitch, Yaw, and
+  Roll but is not painted into saved high-resolution photos or CFD outputs.
 
 ## 1.3.12 tip topology and color-boundary correction
 
@@ -335,6 +360,26 @@ general performance guarantee. The photograph and its identifiers are not
 part of the repository.
 
 ## Verification record
+
+Verification on 2026-10-08 against the current 1.3.13 working tree:
+
+- all 99 tests passed with the pinned FinFindR checkpoint directory enabled;
+  the same suite without that directory passed 97 tests and skipped the two
+  external-model integration tests;
+- the suite covers the reviewed Photo-ID mask's below-base clipping and
+  terminal-tail repair, measured-CFD isolation, selected-skin motion preview,
+  contour-detail preservation, projected X/Y/Z guide, and omission of that
+  guide from saved photos; and
+- this documentation update does not change application code or frozen
+  baseline files.
+
+To repeat the full checkpoint-backed suite after installing the GUI and
+preparing the external models:
+
+```bash
+FINSHAPE_FINFINR_MODEL_DIR=/path/to/finfindr-0.1.21/source/inst/extdata \
+  python -m pytest -q
+```
 
 Verification completed on 2026-10-01 for version 1.3.13:
 
